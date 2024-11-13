@@ -4,7 +4,13 @@ import { Grid, Box, Typography, Button, CircularProgress } from "@mui/material";
 import Tesseract from "tesseract.js";
 import { parse, isAfter, format } from "date-fns";
 
-const ImageUploadBox = ({ setImage, userDate, boxHeight = 200 }) => {
+const ImageUploadBox = ({
+  fieldName = "image",
+  setImage,
+  userDate,
+  boxHeight = 200,
+  uploadText = "Click or Drag & Drop to Upload Medicine Image",
+}) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -231,7 +237,7 @@ const ImageUploadBox = ({ setImage, userDate, boxHeight = 200 }) => {
         <Grid item xs={12} sm={8} md={6}>
           <Box
             component="label"
-            htmlFor="image-upload"
+            htmlFor={`${fieldName}-upload`} // Unique ID for each input
             sx={{
               border: "2px dashed #58869e",
               borderRadius: 2,
@@ -252,7 +258,7 @@ const ImageUploadBox = ({ setImage, userDate, boxHeight = 200 }) => {
             }}
           >
             <input
-              id="image-upload"
+              id={`${fieldName}-upload`}
               type="file"
               accept="image/*"
               hidden
@@ -274,7 +280,7 @@ const ImageUploadBox = ({ setImage, userDate, boxHeight = 200 }) => {
             ) : (
               // Display Upload Prompt
               <Typography variant="h6" color="#58869e">
-                Click or Drag & Drop to Upload Medicine Image
+                {uploadText}
               </Typography>
             )}
           </Box>

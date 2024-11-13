@@ -211,7 +211,9 @@ const About = () => {
                         <CardMedia
                           component="img"
                           height="180"
-                          image={getImageUrl(medicine?.image)}
+                          image={getImageUrl(
+                            medicine?.frontImage ?? medicine?.image
+                          )}
                           alt={medicine?.name}
                           sx={{
                             borderTopLeftRadius: "12px", // Rounded corners on the image

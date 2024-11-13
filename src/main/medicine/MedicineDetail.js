@@ -188,6 +188,7 @@ import {
   Grid,
   Button,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -290,6 +291,7 @@ const MedicineDetail = () => {
     donationStatus,
     donor,
     image,
+    frontImage,
   } = medicineData;
 
   return (
@@ -318,10 +320,11 @@ const MedicineDetail = () => {
         <CardMedia
           component="img"
           height="200"
-          image={getImageUrl(image)} // Placeholder for image
+          image={getImageUrl(frontImage ?? image)} // Placeholder for image
           alt={name}
           sx={{ borderRadius: 2 }}
         />
+        <Divider sx={{ mt: "20px" }} />
         <CardContent>
           <Typography variant="h4" component="div" gutterBottom>
             {name}
@@ -351,7 +354,6 @@ const MedicineDetail = () => {
                 </Typography>
               </Box>
             </Grid>
-
             {/* Additional Information */}
             <Grid item xs={12} sm={6}>
               <Box display="flex" alignItems="center" mb={1}>
@@ -389,11 +391,30 @@ const MedicineDetail = () => {
               </Box>
             </Grid>
           </Grid>
+          <Divider sx={{ mt: "20px" }} />
 
           {/* Medicine Description */}
           <Typography variant="body1" color="text.secondary" mt={2}>
             <strong>Description:</strong> {description}
           </Typography>
+          <Divider sx={{ mt: "20px" }} />
+
+          {frontImage && (
+            <>
+              <Typography variant="body1" color="text.secondary" mt={2}>
+                <strong>Expiry Image:</strong>
+              </Typography>
+
+              <CardMedia
+                component="img"
+                height="200"
+                image={getImageUrl(image)} // Placeholder for image
+                alt={name}
+                sx={{ borderRadius: 2 }}
+              />
+              <Divider sx={{ mt: "20px", mb: "6px" }} />
+            </>
+          )}
 
           {/* Donor Information */}
           <Box mt={4}>

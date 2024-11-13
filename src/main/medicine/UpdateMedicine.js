@@ -37,6 +37,7 @@ const UpdateMedicine = () => {
     description: "",
     donationStatus: "",
     image: "",
+    frontImage: "",
   });
 
   // Fetch medicine data on load
@@ -68,17 +69,18 @@ const UpdateMedicine = () => {
   // Form validation
   const validateForm = () => {
     if (
-      !formData.name ||
-      !formData.type ||
-      !formData.manufacturer ||
-      !formData.batchNumber ||
-      !formData.dosage ||
-      !formData.expirationDate ||
-      !formData.price ||
-      !formData.quantityAvailable ||
-      !formData.description ||
-      !formData.donationStatus ||
-      !formData.image
+      (!formData.name ||
+        !formData.type ||
+        !formData.manufacturer ||
+        !formData.batchNumber ||
+        !formData.dosage ||
+        !formData.expirationDate ||
+        !formData.price ||
+        !formData.quantityAvailable ||
+        !formData.description ||
+        !formData.donationStatus ||
+        !formData.image,
+      !formData.frontImage)
     )
       return true;
     return false;
@@ -292,7 +294,23 @@ const UpdateMedicine = () => {
               </TextField>
             </Grid>
             <Grid item xs={12}>
+              <Typography>Front Image</Typography>
               <ImageUploadBox
+                uploadText="Click or Drag & Drop to Update Medicine Front Image"
+                fieldName="frontImage" // Specify which field to update
+                setImage={(imgObj) =>
+                  setFormData((prevData) => ({
+                    ...prevData,
+                    frontImage: imgObj,
+                  }))
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>Expiry Image</Typography>
+              <ImageUploadBox
+                fieldName="image" // Specify which field to update
+                uploadText="Click or Drag & Drop to Update Medicine Expiry Image"
                 setImage={(imgObj) =>
                   setFormData((prevData) => ({
                     ...prevData,

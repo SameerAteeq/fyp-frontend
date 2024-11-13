@@ -7,6 +7,7 @@ import {
   Typography,
   MenuItem,
   Paper,
+  Divider,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -39,6 +40,7 @@ const AddMedicine = () => {
     description: "",
     donationStatus: "Pending",
     image: "",
+    frontImage: "",
   });
 
   // Form validation
@@ -54,7 +56,8 @@ const AddMedicine = () => {
       !formData.quantityAvailable ||
       !formData.description ||
       !formData.donationStatus ||
-      !formData.image
+      !formData.image ||
+      !formData.frontImage
     )
       return true;
 
@@ -89,6 +92,7 @@ const AddMedicine = () => {
       if (formData.image && formData.image instanceof File) {
         // Use the helper function to detect text from the image
         const textDetections = await detectTextFromImageFile(formData.image);
+
         console.log("Detected text in image:", textDetections);
 
         const isDateMatch = extractAndValidateDate(
@@ -137,6 +141,7 @@ const AddMedicine = () => {
         description: "",
         donationStatus: "",
         image: "",
+        frontImage: "",
       });
 
       dispatch(
@@ -307,7 +312,24 @@ const AddMedicine = () => {
               />
             </Grid>
             <Grid item xs={12}>
+              <Typography>Front Image</Typography>
               <ImageUploadBox
+                uploadText="Click or Drag & Drop to Upload Medicine Front Image"
+                fieldName="frontImage" // Specify which field to update
+                setImage={(imgObj) =>
+                  setFormData((prevData) => ({
+                    ...prevData,
+                    frontImage: imgObj,
+                  }))
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography>Expiry Image</Typography>
+              <ImageUploadBox
+                fieldName="image" // Specify which field to update
+                uploadText="Click or Drag & Drop to Upload Medicine Expiry Image"
                 setImage={(imgObj) =>
                   setFormData((prevData) => ({
                     ...prevData,
@@ -317,6 +339,7 @@ const AddMedicine = () => {
                 userDate={formData?.expirationDate}
               />
             </Grid>
+
             <Grid item xs={12}>
               <LoadingButton
                 fullWidth
