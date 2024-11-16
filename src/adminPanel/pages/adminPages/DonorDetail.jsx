@@ -1,4 +1,3 @@
-// components/DonorDetail.js
 import React, { useState, useEffect } from "react";
 import {
   Paper,
@@ -6,19 +5,22 @@ import {
   Card,
   Typography,
   CardContent,
-  CardMedia,
   Grid,
   Box,
   Button,
   Container,
   Stack,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useApiManager } from "../../../apiManager/apiManager";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../store/reducer";
-import logoMed from "../../../assets/images/pic.jpg";
 
 const DonorDetail = () => {
   const { id } = useParams();
@@ -29,26 +31,64 @@ const DonorDetail = () => {
   const [donor, setDonor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const fetchDonor = async () => {
     try {
       const { data, error } = await apiManager.get(`/admin/user/Donor/${id}`);
-      console.log("🚀 ~ fetchDonor ~ data:", data);
       if (error) {
         dispatch(
           showToast({
-            error: error,
+            message: error,
             severity: "error",
           })
         );
       }
-      setLoading(false);
       setDonor(data?.data);
     } catch (err) {
       console.error("Error fetching donor details:", err);
       setError(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (medicineId) => {
+    try {
+      const { data, error } = await apiManager.delete(
+        `/medicines/${medicineId}`
+      );
+      if (error) {
+        dispatch(
+          showToast({
+            message: error,
+            severity: "error",
+          })
+        );
+        return;
+      }
+
+      dispatch(
+        showToast({
+          message: "Medicine deleted successfully",
+          severity: "success",
+        })
+      );
+
+      // Refresh the donor data
+      fetchDonor();
+    } catch (err) {
+      console.error("Error deleting medicine:", err);
+      dispatch(
+        showToast({
+          message: "Failed to delete the medicine. Please try again.",
+          severity: "error",
+        })
+      );
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedMedicine(null);
     }
   };
 
@@ -132,8 +172,8 @@ const DonorDetail = () => {
             Donation Medicine
           </Typography>
           <Grid container spacing={4}>
-            {donor?.medicines?.map((medicine, index) => (
-              <Grid item key={index} xs={12} sm={6}>
+            {donor?.medicines?.map((medicine) => (
+              <Grid item key={medicine.id} xs={12} sm={6}>
                 <Card
                   elevation={10}
                   sx={{
@@ -142,38 +182,38 @@ const DonorDetail = () => {
                     display: "flex",
                     flexDirection: "column",
                     position: "relative",
-                    backgroundColor: "#f5f5f5", // Light background color for card
-                    boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", // Custom shadow for elevation effect
-                    transition: "transform 0.3s ease-in-out", // Smooth transition on hover
-                    "&:hover": {
-                      transform: "translateY(-5px)", // Slight raise on hover for interactivity
-                    },
+                    backgroundColor: "#f5f5f5",
                   }}
                 >
-                  {/* Update Button on top of the image */}
-
-                  {/* Image at the top of the card */}
-                  {/* <CardMedia
-                    component="img"
-                    height="180"
-                    image={logoMed}
-                    alt={medicine?.name}
+                  {/* Small Delete Button */}
+                  <Button
+                    size="small"
+                    variant="contained"
                     sx={{
-                      borderTopLeftRadius: "12px", // Rounded corners on the image
-                      borderTopRightRadius: "12px",
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      backgroundColor: "red",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "darkred",
+                      },
                     }}
-                  /> */}
-
-                  {/* Content below the image */}
+                    onClick={() => {
+                      setSelectedMedicine(medicine._id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    Delete
+                  </Button>
                   <CardContent sx={{ flexGrow: 1, padding: 3 }}>
                     <Typography variant="h6" color="text.primary" mb={2}>
                       {medicine?.name}
                     </Typography>
-
                     <Typography
                       variant="body2"
                       color={
-                        medicine?.donationStatus == "Pending"
+                        medicine?.donationStatus === "Pending"
                           ? "#00ff11"
                           : "#ff0000"
                       }
@@ -182,19 +222,15 @@ const DonorDetail = () => {
                     >
                       <strong>{medicine?.donationStatus}</strong>
                     </Typography>
-                    {/* Medicine Details */}
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" color="text.secondary">
                         <strong>Type:</strong> {medicine?.type}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        <strong>Expiration:</strong>
-                        &nbsp;
-                        {new Intl.DateTimeFormat("en-GB", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "2-digit",
-                        }).format(new Date(medicine?.expirationDate))}
+                        <strong>Expiration:</strong>{" "}
+                        {new Date(
+                          medicine?.expirationDate
+                        ).toLocaleDateString()}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         <strong>Dosage:</strong> {medicine?.dosage}
@@ -206,30 +242,43 @@ const DonorDetail = () => {
                         <strong>Manufacturer:</strong> {medicine?.manufacturer}
                       </Typography>
                     </Box>
-
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Price:</strong> ${medicine?.price}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Quantity Available:</strong>{" "}
-                        {medicine?.quantityAvailable}
-                      </Typography>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Description:</strong> {medicine?.description}
-                    </Typography>
                   </CardContent>
-
-                  {/* Card Actions */}
-                  {/* Get button for Recipient */}
                 </Card>
               </Grid>
             ))}
           </Grid>
         </Container>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this medicine? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            color="secondary"
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleDelete(selectedMedicine)}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
